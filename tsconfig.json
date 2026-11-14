@@ -10,8 +10,9 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "types": ["node", "vitest/globals", "vite/client", "@testing-library/jest-dom"],
     "paths": { "@shared/*": ["./supabase/functions/_shared/*"] }
   },
-  "include": ["src", "tests", "vite.config.ts", "supabase/functions/_shared"]
+  "include": ["src", "tests", "vite.config.ts", "supabase/functions/_shared", "supabase/functions/read-meter/parse.ts"]
 }

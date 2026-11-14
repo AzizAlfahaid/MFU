@@ -144,7 +144,13 @@
     "none": "No readings yet",
     "outside": "Outside the set range",
     "fromPhoto": "from photo",
-    "confirmDelete": "Delete this reading?"
+    "confirmDelete": "Delete this reading?",
+    "how": "How do you want to add it?",
+    "takePhoto": "Take a photo of the meter",
+    "typeNumber": "Type the number",
+    "reading": "Reading the photo…",
+    "unreadable": "Could not read the photo. Please type the number.",
+    "uploadFailed": "Could not send the photo. Please type the number."
   },
   "ranges": {
     "title": "Normal ranges",

@@ -26,3 +26,7 @@ export interface ApptRow {
   day_before_sent_at: string | null
   day_of_sent_at: string | null
 }
+
+export type MeterResult =
+  | { readable: false }
+  | { readable: true; value1: number; value2?: number; pulse?: number; confident: boolean }

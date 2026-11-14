@@ -158,3 +158,17 @@ export async function updateHousehold(patch: { missed_wait_minutes?: number; tim
   const p = check(await supabase.from('profiles').select('household_id').eq('id', data.user!.id).single()) as { household_id: string }
   check(await supabase.from('households').update(patch).eq('id', p.household_id))
 }
+
+// ---------- meter photo ----------
+import type { MeterResult } from '@shared/types'
+
+/** Asks Claude to read the meter in an uploaded photo. Any failure counts as "could not read". */
+export async function readMeter(photoPath: string, type: ReadingType): Promise<MeterResult> {
+  try {
+    const { data, error } = await supabase.functions.invoke('read-meter', { body: { photo_path: photoPath, type } })
+    if (error || !data || typeof data !== 'object' || (data as { readable?: unknown }).readable !== true) return { readable: false }
+    return data as MeterResult
+  } catch {
+    return { readable: false }
+  }
+}
