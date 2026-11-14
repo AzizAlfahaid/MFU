@@ -1,4 +1,4 @@
-import type { Lang, Role } from './types'
+import type { Lang, Role } from './types.ts'
 
 const DOMAIN = 'members.mfu.app'
 

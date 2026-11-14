@@ -1,11 +1,13 @@
 import webpush from 'npm:web-push'
 import type { Notifier, PushSub } from './run.ts'
 
-export function createNotifier(): Notifier {
-  const pub = Deno.env.get('VAPID_PUBLIC_KEY')
-  const priv = Deno.env.get('VAPID_PRIVATE_KEY')
-  const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
-  if (pub && priv) webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@example.com', pub, priv)
+export interface NotifierConfig { vapidPublic?: string; vapidPrivate?: string; vapidSubject?: string; telegramToken?: string }
+
+export function createNotifier(cfg: NotifierConfig): Notifier {
+  const pub = cfg.vapidPublic
+  const priv = cfg.vapidPrivate
+  const token = cfg.telegramToken
+  if (pub && priv) webpush.setVapidDetails(cfg.vapidSubject ?? 'mailto:admin@example.com', pub, priv)
 
   return {
     async push(sub: PushSub, payload) {

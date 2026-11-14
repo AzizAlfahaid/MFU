@@ -3,6 +3,7 @@
 import Anthropic from 'npm:@anthropic-ai/sdk'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { encodeBase64 } from 'jsr:@std/encoding/base64'
+import { getSecret } from '../_deno/secrets.ts'
 import { toMeterResult } from './parse.ts'
 import type { ReadingType } from '../_shared/types.ts'
 
@@ -41,7 +42,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
 
-  const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
+  const apiKey = await getSecret('ANTHROPIC_API_KEY')
   if (!apiKey) return json({ error: 'not_configured' }, 503)
 
   const url = Deno.env.get('SUPABASE_URL')!
@@ -67,7 +68,7 @@ Deno.serve(async (req) => {
 
     const client = new Anthropic({ apiKey })
     const res = await client.messages.create({
-      model: Deno.env.get('CLAUDE_MODEL') ?? 'claude-opus-5-5',
+      model: (await getSecret('CLAUDE_MODEL')) ?? 'claude-opus-5-5',
       max_tokens: 2000,
       system: SYSTEM,
       output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },

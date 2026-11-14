@@ -1,4 +1,4 @@
-import type { RangeKey, ReadingType, SugarContext } from './types'
+import type { RangeKey, ReadingType, SugarContext } from './types.ts'
 
 export function rangeKeysFor(type: ReadingType, context: SugarContext | null): RangeKey[] {
   if (type === 'sugar') return [`sugar_${context ?? 'other'}` as RangeKey]

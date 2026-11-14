@@ -1,4 +1,4 @@
-import type { Lang } from './types'
+import type { Lang } from './types.ts'
 
 const MIN = 60_000
 

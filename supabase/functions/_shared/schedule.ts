@@ -1,5 +1,5 @@
-import { addDays, localDate, localTime, minutes, zonedToUtc } from './time'
-import type { ApptRow, DoseRow, MedTime, Slot } from './types'
+import { addDays, localDate, localTime, minutes, zonedToUtc } from './time.ts'
+import type { ApptRow, DoseRow, MedTime, Slot } from './types.ts'
 
 const norm = (iso: string) => new Date(iso).toISOString()
 const hhmm = (t: string) => t.slice(0, 5)

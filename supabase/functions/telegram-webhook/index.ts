@@ -1,5 +1,6 @@
 // Telegram calls this when someone presses "Start" on the bot link: it links their chat to their account.
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { getSecret } from '../_deno/secrets.ts'
 
 const TEXT = {
   ok: { ar: 'تم الربط. ستصلك التنبيهات هنا.', en: 'Connected. You will get alerts here.' },
@@ -7,7 +8,7 @@ const TEXT = {
 }
 
 async function reply(chatId: number, text: string) {
-  const token = Deno.env.get('TELEGRAM_BOT_TOKEN')
+  const token = await getSecret('TELEGRAM_BOT_TOKEN')
   if (!token) return
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, text }),
@@ -15,7 +16,7 @@ async function reply(chatId: number, text: string) {
 }
 
 Deno.serve(async (req) => {
-  const secret = Deno.env.get('TELEGRAM_WEBHOOK_SECRET')
+  const secret = await getSecret('TELEGRAM_WEBHOOK_SECRET')
   if (!secret || req.headers.get('X-Telegram-Bot-Api-Secret-Token') !== secret) return new Response('unauthorized', { status: 401 })
   try {
     const update = await req.json()

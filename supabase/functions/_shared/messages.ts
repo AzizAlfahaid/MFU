@@ -1,4 +1,4 @@
-import type { Lang, ReadingType, SugarContext } from './types'
+import type { Lang, ReadingType, SugarContext } from './types.ts'
 
 const list = (lang: Lang, names: string[]) => names.join(lang === 'ar' ? '، ' : ', ')
 

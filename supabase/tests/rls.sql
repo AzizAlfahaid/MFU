@@ -199,6 +199,14 @@ select t.as_user('00000000-0000-0000-0000-0000000000a1');
 select t.ok((select count(*) from storage.objects) = 1, 'family sees files');
 with d as (delete from storage.objects returning 1) select t.ok((select count(*) from d) = 1, 'family can delete files');
 
+-- ---------- server-only secrets ----------
+select t.as_super();
+insert into app_secrets(key, value) values ('CRON_SECRET', 'x');
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+select t.blocked($$select * from app_secrets$$, 'family cannot read server secrets');
+select t.blocked($$insert into app_secrets(key,value) values ('k','v')$$, 'family cannot write server secrets');
+select t.as_super();
+
 -- ---------- anonymous ----------
 set local role anon;
 select t.blocked($$select * from medications$$, 'anon cannot read medications');
