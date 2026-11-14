@@ -13,7 +13,9 @@
     "next": "Next",
     "loading": "Loading…",
     "taken": "Taken",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "auth": {
     "signIn": "Sign in",
@@ -52,7 +54,24 @@
     "family": "Family"
   },
   "medicines": {
-    "add": "Add medicine"
+    "add": "Add medicine",
+    "edit": "Edit medicine",
+    "none": "No medicines yet",
+    "name": "Medicine name",
+    "dose": "Dose",
+    "notes": "Notes",
+    "times": "Times each day",
+    "time": "Time",
+    "addTime": "Add a time",
+    "removeTime": "Remove",
+    "addPhoto": "Add photo of the box",
+    "changePhoto": "Change photo",
+    "active": "Currently taking",
+    "stopped": "Stopped",
+    "confirmDelete": "Delete {{name}}? Its history is deleted too.",
+    "errName": "Please enter the medicine name",
+    "errDose": "Please enter the dose",
+    "errTimes": "Please add at least one time"
   },
   "settings": {
     "members": "Household members",

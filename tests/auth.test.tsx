@@ -7,6 +7,7 @@ import { setLanguage } from '../src/i18n'
 vi.mock('../src/lib/auth', () => ({ useAuth: vi.fn(), AuthProvider: ({ children }: { children: React.ReactNode }) => children }))
 vi.mock('../src/lib/api', () => ({
   listMembers: vi.fn().mockResolvedValue([]),
+  listMedications: vi.fn().mockResolvedValue([]),
   createMember: vi.fn().mockResolvedValue({ id: 'new' }),
   updateMyLang: vi.fn().mockResolvedValue(undefined),
   createHousehold: vi.fn().mockResolvedValue('hid'),

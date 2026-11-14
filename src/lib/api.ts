@@ -44,3 +44,45 @@ export async function updateMyLang(lang: Lang): Promise<void> {
   if (!data.user) return
   check(await supabase.from('profiles').update({ lang }).eq('id', data.user.id))
 }
+
+// ---------- medicines ----------
+import type { Medication } from './types'
+
+export type MedicationWithTimes = Medication & { times: string[] }
+export interface MedicationInput {
+  id?: string; name: string; dose: string; notes: string | null; photo_path: string | null; active: boolean; times: string[]
+}
+
+export async function listMedications(): Promise<MedicationWithTimes[]> {
+  const rows = check(await supabase
+    .from('medications')
+    .select('id, household_id, name, dose, notes, photo_path, active, medication_times(time_of_day)')
+    .order('name')) as (Medication & { medication_times: { time_of_day: string }[] })[]
+  return rows.map(({ medication_times, ...m }) => ({
+    ...m,
+    times: medication_times.map((t) => t.time_of_day.slice(0, 5)).sort(),
+  }))
+}
+
+export async function saveMedication(input: MedicationInput): Promise<void> {
+  const fields = { name: input.name, dose: input.dose, notes: input.notes, photo_path: input.photo_path, active: input.active }
+  let id = input.id
+  if (id) check(await supabase.from('medications').update(fields).eq('id', id))
+  else id = (check(await supabase.from('medications').insert(fields).select('id').single()) as { id: string }).id
+
+  const wanted = [...new Set(input.times)].map((t) => `${t}:00`)
+  const existing = check(await supabase.from('medication_times').select('id, time_of_day').eq('medication_id', id)) as { id: string; time_of_day: string }[]
+  const stale = existing.filter((e) => !wanted.includes(e.time_of_day)).map((e) => e.id)
+  if (stale.length) check(await supabase.from('medication_times').delete().in('id', stale))
+  const have = new Set(existing.map((e) => e.time_of_day))
+  const fresh = wanted.filter((t) => !have.has(t)).map((time_of_day) => ({ medication_id: id, time_of_day }))
+  if (fresh.length) check(await supabase.from('medication_times').insert(fresh))
+}
+
+export async function setMedicationPhoto(id: string, path: string): Promise<void> {
+  check(await supabase.from('medications').update({ photo_path: path }).eq('id', id))
+}
+
+export async function deleteMedication(id: string): Promise<void> {
+  check(await supabase.from('medications').delete().eq('id', id))
+}

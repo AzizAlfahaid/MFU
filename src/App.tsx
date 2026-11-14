@@ -5,6 +5,7 @@ import Login from './screens/Login'
 import Onboarding from './screens/Onboarding'
 import ElderToday from './screens/elder/ElderToday'
 import AppShell from './screens/app/AppShell'
+import Medicines from './screens/app/Medicines'
 import Placeholder from './screens/app/Placeholder'
 import Settings from './screens/app/Settings'
 
@@ -26,9 +27,10 @@ export function AppRoutes() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<Navigate to="/today" replace />} />
-        {(['today', 'medicines', 'readings', 'appointments', 'history'] as const).map((tab) => (
+        {(['today', 'readings', 'appointments', 'history'] as const).map((tab) => (
           <Route key={tab} path={tab} element={<Placeholder tab={tab} />} />
         ))}
+        <Route path="medicines" element={<Medicines />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Route>

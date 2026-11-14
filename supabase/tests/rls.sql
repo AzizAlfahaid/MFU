@@ -96,6 +96,9 @@ with u as (update medications set name = 'M1b' where id = '10000000-0000-0000-00
 with i as (insert into ranges(household_id,key,low,high) values ('00000000-0000-0000-0000-00000000aaaa','temp',36,38) returning 1)
   select t.ok((select count(*) from i) = 1, 'family can set range');
 select t.blocked($$insert into ranges(household_id,key,low,high) values ('00000000-0000-0000-0000-00000000aaaa','bp_systolic',140,90)$$, 'range high must exceed low');
+-- household_id defaults to the caller's household
+with i as (insert into hospitals(name) values ('Default Hospital') returning household_id)
+  select t.ok((select household_id from i) = '00000000-0000-0000-0000-00000000aaaa', 'household_id defaults to my household');
 
 -- ---------- readings ----------
 select t.as_user('00000000-0000-0000-0000-0000000000a3');
