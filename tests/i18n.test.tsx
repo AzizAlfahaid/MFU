@@ -26,7 +26,7 @@ it('defaults to Arabic RTL', () => {
 
 it('switches to English LTR and remembers it', async () => {
   render(<App />)
-  await userEvent.click(screen.getByRole('button', { name: 'English' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'English' }))
   expect(document.documentElement.dir).toBe('ltr')
   expect(localStorage.getItem('mfu.lang')).toBe('en')
 })

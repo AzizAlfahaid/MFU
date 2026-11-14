@@ -1,5 +1,70 @@
 {
-  "app": { "name": "Medical Follow-Up" },
-  "lang": { "switchTo": "العربية" },
-  "common": { "save": "Save", "cancel": "Cancel", "retry": "Try again", "back": "Back", "next": "Next", "loading": "Loading…", "taken": "Taken" }
+  "app": {
+    "name": "Medical Follow-Up"
+  },
+  "lang": {
+    "switchTo": "العربية"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading…",
+    "taken": "Taken",
+    "error": "Something went wrong. Please try again."
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "login": "Username or email",
+    "email": "Email",
+    "password": "Password",
+    "wrong": "Wrong username or password",
+    "weak": "Password must be at least 8 characters",
+    "signUpFailed": "Could not create the account",
+    "createAccount": "Create account",
+    "newFamily": "New family? Create an account",
+    "haveAccount": "I already have an account"
+  },
+  "onboarding": {
+    "title": "Set up your household",
+    "householdName": "Household name",
+    "yourName": "Your name",
+    "create": "Create household"
+  },
+  "elder": {
+    "today": "Today"
+  },
+  "tabs": {
+    "label": "Main menu",
+    "today": "Today",
+    "medicines": "Medicines",
+    "readings": "Readings",
+    "appointments": "Appointments",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "roles": {
+    "elder": "Elder",
+    "helper": "Helper",
+    "family": "Family"
+  },
+  "medicines": {
+    "add": "Add medicine"
+  },
+  "settings": {
+    "members": "Household members",
+    "name": "Name",
+    "role": "Role",
+    "language": "Language",
+    "username": "Username",
+    "password": "Password (8+ characters)",
+    "passwordShort": "Password must be at least 8 characters",
+    "usernameInvalid": "Username: letters and numbers only, at least 3",
+    "usernameTaken": "That username is already used",
+    "memberAdded": "Member added",
+    "addMember": "Add member"
+  }
 }
