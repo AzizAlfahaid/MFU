@@ -12,7 +12,7 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', u)::text, true);
   execute 'set local role authenticated';
 end $$;
-create function t.as_super() returns void language plpgsql as $$ begin execute 'reset role'; end $$;
+create function t.as_super() returns void language plpgsql as $$ begin execute 'reset role'; perform set_config('request.jwt.claims', '', true); end $$;
 create function t.ok(cond boolean, msg text) returns void language plpgsql as $$
 begin if not coalesce(cond, false) then raise exception 'ASSERT FAILED: %', msg; end if; end $$;
 -- passes when the statement errors OR changes no rows
@@ -166,6 +166,17 @@ with i as (insert into push_subscriptions(household_id,user_id,endpoint,p256dh,a
 select t.blocked($$insert into push_subscriptions(household_id,user_id,endpoint,p256dh,auth) values ('00000000-0000-0000-0000-00000000aaaa','00000000-0000-0000-0000-0000000000a1','https://e/2','k','a')$$, 'cannot add subscription for another user');
 select t.as_user('00000000-0000-0000-0000-0000000000a2');
 select t.ok((select count(*) from push_subscriptions) = 0, 'helper cannot see elder subscription');
+
+-- ---------- register_push_subscription moves a device to whoever signs in on it ----------
+select t.as_user('00000000-0000-0000-0000-0000000000a3');
+select register_push_subscription('https://e/shared', 'k1', 'a1');
+select t.as_user('00000000-0000-0000-0000-0000000000a2');
+select register_push_subscription('https://e/shared', 'k2', 'a2');
+select t.ok((select count(*) from push_subscriptions where endpoint = 'https://e/shared') = 1, 'helper now owns the shared device subscription');
+select t.as_user('00000000-0000-0000-0000-0000000000a3');
+select t.ok((select count(*) from push_subscriptions where endpoint = 'https://e/shared') = 0, 'elder no longer sees it');
+select t.as_super();
+select t.blocked($$select register_push_subscription('https://e/x','k','a')$$, 'anonymous cannot register');
 
 -- ---------- create_household ----------
 select t.as_user('00000000-0000-0000-0000-0000000000c1');

@@ -46,3 +46,5 @@ export function appointmentText(
   }
   return `📅 Appointment ${when === 'day_before' ? 'tomorrow' : 'today'} at ${time}${where ? ` — ${where}` : ''}`
 }
+
+export const appTitle = (lang: Lang): string => (lang === 'ar' ? 'المتابعة الطبية' : 'Medical Follow-Up')

@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { isValidUsername } from '@shared/login'
 import ErrorRetry from '../../components/ErrorRetry'
 import { parseNumber } from '@shared/numbers'
-import { createMember, listMembers, listRanges, saveRange, updateHousehold } from '../../lib/api'
+import { createMember, getMyTelegram, listMembers, listRanges, saveRange, updateHousehold } from '../../lib/api'
+import NotifyButton from '../../components/NotifyButton'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import type { Member, RangeKey, Role } from '../../lib/types'
 import type { Lang } from '../../i18n'
@@ -146,12 +148,29 @@ function Wait() {
   )
 }
 
+function Telegram() {
+  const { t } = useTranslation()
+  const bot = import.meta.env.VITE_TELEGRAM_BOT as string | undefined
+  const [me, setMe] = useState<{ telegram_chat_id: number | null; telegram_link_code: string } | null>(null)
+  useEffect(() => { getMyTelegram().then(setMe).catch(() => undefined) }, [])
+  return (
+    <section>
+      <h2>Telegram</h2>
+      {me?.telegram_chat_id ? <p role="status">✓ {t('telegram.connected')}</p>
+        : bot && me ? <a href={`https://t.me/${bot}?start=${me.telegram_link_code}`} target="_blank" rel="noreferrer">{t('telegram.connect')}</a>
+        : <p className="muted">{t('telegram.notReady')}</p>}
+    </section>
+  )
+}
+
 export default function Settings() {
   const { t } = useTranslation()
   const { profile, signOut } = useAuth()
   return (
     <div>
       <h1>{t('tabs.settings')}</h1>
+      <section><h2>{t('notify.title')}</h2><NotifyButton /><p><Link to="/setup">{t('notify.setupGuide')}</Link></p></section>
+      {profile?.role === 'family' && <Telegram />}
       {profile?.role === 'family' && <Members />}
       {profile?.role === 'family' && <Ranges />}
       {profile?.role === 'family' && <Wait />}

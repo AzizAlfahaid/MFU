@@ -190,5 +190,43 @@
     "confirmDelete": "Delete this appointment?",
     "today": "Appointment today",
     "tomorrow": "Appointment tomorrow"
+  },
+  "notify": {
+    "title": "Notifications",
+    "turnOn": "Turn on notifications",
+    "on": "Notifications are on",
+    "setupGuide": "Setup steps",
+    "needs_home_screen": "On iPhone and iPad, first add this page to the Home Screen, then open it from there.",
+    "denied": "Notifications were refused. Allow them in the phone settings for this app.",
+    "unsupported": "This device or browser cannot show notifications.",
+    "failed": "Could not turn on notifications. Try again."
+  },
+  "telegram": {
+    "connected": "Telegram connected",
+    "connect": "Connect Telegram",
+    "notReady": "Telegram is not set up yet."
+  },
+  "setup": {
+    "title": "Setup steps",
+    "homeScreen": {
+      "title": "Add to Home Screen",
+      "body": "Open this page in Safari. Tap the Share button, then \"Add to Home Screen\". iPhone and iPad need iOS / iPadOS 16.4 or newer."
+    },
+    "openIcon": {
+      "title": "Open from the icon",
+      "body": "Close Safari and open the app from its icon on the Home Screen."
+    },
+    "notifications": {
+      "title": "Turn on notifications",
+      "body": "Tap \"Turn on notifications\" and choose Allow."
+    },
+    "sound": {
+      "title": "Turn on sound",
+      "body": "Tap \"Turn on sound\" once each time you open the app. Keep the phone volume up and the silent switch off."
+    },
+    "telegram": {
+      "title": "Connect Telegram (family)",
+      "body": "In Settings, tap \"Connect Telegram\", then press Start in Telegram."
+    }
   }
 }

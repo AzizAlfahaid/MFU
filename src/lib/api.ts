@@ -210,3 +210,13 @@ export async function saveAppointment(input: AppointmentInput): Promise<void> {
 export async function deleteAppointment(id: string): Promise<void> {
   check(await supabase.from('appointments').delete().eq('id', id))
 }
+
+// ---------- notifications ----------
+export async function registerPush(sub: { endpoint: string; p256dh: string; auth: string }): Promise<void> {
+  check(await supabase.rpc('register_push_subscription', { p_endpoint: sub.endpoint, p_p256dh: sub.p256dh, p_auth: sub.auth }))
+}
+
+export async function getMyTelegram(): Promise<{ telegram_chat_id: number | null; telegram_link_code: string }> {
+  const rows = check(await supabase.rpc('my_telegram')) as { telegram_chat_id: number | null; telegram_link_code: string }[]
+  return rows[0]
+}

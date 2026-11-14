@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { formatTime } from '@shared/time'
 import AppointmentCard from '../../components/AppointmentCard'
 import BigButton from '../../components/BigButton'
+import NotifyButton from '../../components/NotifyButton'
 import ErrorRetry from '../../components/ErrorRetry'
 import { markSlotTaken } from '../../lib/api'
 import { isUnlocked, startAlarm, stopAlarm, unlock } from '../../lib/sound'
@@ -64,6 +65,7 @@ export default function ElderToday() {
       <h1>{t('elder.today')}</h1>
       {done && <p role="status" className="done">✓ {t('elder.done')}</p>}
       {loadError && <ErrorRetry message={t('elder.loadFailed')} onRetry={() => void reload()} />}
+      <NotifyButton big />
       {!soundOn && <BigButton label={t('elder.soundOn')} variant="secondary" onClick={() => void unlock().then(() => setSoundOn(isUnlocked()))} />}
       {loaded && (
         <p>{next ? `${t('elder.nextMedicine')}: ${formatTime(next.scheduled_at, tz, i18n.language as Lang)}` : t('elder.noMoreToday')}</p>

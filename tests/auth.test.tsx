@@ -7,6 +7,8 @@ import { setLanguage } from '../src/i18n'
 vi.mock('../src/lib/auth', () => ({ useAuth: vi.fn(), AuthProvider: ({ children }: { children: React.ReactNode }) => children }))
 vi.mock('../src/lib/api', () => ({
   listMembers: vi.fn().mockResolvedValue([]),
+  getMyTelegram: vi.fn().mockResolvedValue({ telegram_chat_id: null, telegram_link_code: 'x' }),
+  registerPush: vi.fn(),
   listMedications: vi.fn().mockResolvedValue([]),
   listRanges: vi.fn().mockResolvedValue([]),
   saveRange: vi.fn(),

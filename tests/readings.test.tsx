@@ -10,6 +10,7 @@ vi.mock('../src/lib/api', () => ({
   listReadings: vi.fn(), listRanges: vi.fn().mockResolvedValue([]), saveRange: vi.fn().mockResolvedValue(undefined),
   deleteReading: vi.fn().mockResolvedValue(undefined), updateHousehold: vi.fn().mockResolvedValue(undefined),
   listMembers: vi.fn().mockResolvedValue([]), createMember: vi.fn(),
+  getMyTelegram: vi.fn().mockResolvedValue({ telegram_chat_id: null, telegram_link_code: 'x' }), registerPush: vi.fn(),
 }))
 import * as api from '../src/lib/api'
 import { useAuth } from '../src/lib/auth'

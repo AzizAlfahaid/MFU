@@ -10,6 +10,7 @@ import AddReading from './screens/elder/AddReading'
 import Appointments from './screens/app/Appointments'
 import History from './screens/app/History'
 import Readings from './screens/app/Readings'
+import SetupGuide from './screens/app/SetupGuide'
 import Today from './screens/app/Today'
 import Settings from './screens/app/Settings'
 
@@ -24,6 +25,7 @@ export function AppRoutes() {
       <Routes>
         <Route path="/" element={<ElderToday />} />
         <Route path="/add-reading" element={<AddReading />} />
+        <Route path="/setup" element={<SetupGuide />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
@@ -39,6 +41,7 @@ export function AppRoutes() {
         <Route path="appointments" element={<Appointments />} />
         <Route path="medicines" element={<Medicines />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="setup" element={<SetupGuide />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Route>
     </Routes>
