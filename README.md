@@ -11,7 +11,7 @@ Arabic and English. Works on iPhone and iPad (added to the Home Screen) and on A
 | Family | Everything | Also the **only** ones who edit medicines, appointments, normal ranges, and who get missed-dose alerts |
 
 ## Owner setup (once)
-1. **Open the link** and tap *New family? Create an account*. This is the family login.
+1. **Open the link** and sign in with the family login you were given (username `family`). Then go to **Settings → New password** and choose your own password.
 2. In **Settings → Household members**, add the elder and the helper (a short username and a password).
 3. In **Medicines**, add each medicine: name, dose, times, a photo of the box.
 4. In **Settings**, enter the **normal ranges** for sugar, blood pressure and temperature (ask the doctor).
@@ -33,5 +33,6 @@ Arabic and English. Works on iPhone and iPad (added to the Home Screen) and on A
 - Backend: Supabase (Postgres with row-level security, Auth, private Storage, Edge Functions `tick`, `read-meter`, `create-member`, `telegram-webhook`).
 - Database tests: `PGPASSWORD=... supabase/tests/run-local.sh` (needs a local Postgres).
 - The `tick` function runs every minute (see `supabase/cron.example.sql`).
-- Secrets live only in Supabase function secrets: `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` (optional), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`.
+- Server secrets are read by the Edge Functions from their environment first, then from the private `app_secrets` table (readable only by the service role): `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` (optional), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`.
+- This installation serves **one household**: only the first person can create it; everyone else is added by family in Settings.
 - Frontend variables (Vercel): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_VAPID_PUBLIC_KEY`, `VITE_TELEGRAM_BOT`.
