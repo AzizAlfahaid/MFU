@@ -1,4 +1,4 @@
-import type { Household, Member, Profile } from './types'
+import type { Hospital, Household, Member, Profile } from './types'
 import type { Lang } from '../i18n'
 import { supabase } from './supabase'
 
@@ -171,4 +171,42 @@ export async function readMeter(photoPath: string, type: ReadingType): Promise<M
   } catch {
     return { readable: false }
   }
+}
+
+// ---------- appointments ----------
+import type { Appointment } from './types'
+
+export type AppointmentWithHospital = Appointment & { hospital: string | null }
+export interface AppointmentInput {
+  id?: string; starts_at: string; hospital_name: string; doctor: string; purpose: string; notes: string
+}
+
+export async function listHospitals(): Promise<Hospital[]> {
+  return check(await supabase.from('hospitals').select('id, name').order('name')) as Hospital[]
+}
+
+export async function listAppointments(fromIso: string): Promise<AppointmentWithHospital[]> {
+  const rows = check(await supabase
+    .from('appointments')
+    .select('id, starts_at, hospital_id, doctor, purpose, notes, hospitals(name)')
+    .gte('starts_at', fromIso).order('starts_at')) as unknown as (Appointment & { hospitals: { name: string } | null })[]
+  return rows.map(({ hospitals, ...a }) => ({ ...a, hospital: hospitals?.name ?? null }))
+}
+
+export async function saveAppointment(input: AppointmentInput): Promise<void> {
+  let hospital_id: string | null = null
+  const name = input.hospital_name.trim()
+  if (name) {
+    hospital_id = (check(await supabase.from('hospitals').upsert({ name }, { onConflict: 'household_id,name' }).select('id').single()) as { id: string }).id
+  }
+  const fields = {
+    starts_at: input.starts_at, hospital_id, doctor: input.doctor.trim() || null,
+    purpose: input.purpose.trim() || null, notes: input.notes.trim() || null,
+  }
+  if (input.id) check(await supabase.from('appointments').update(fields).eq('id', input.id))
+  else check(await supabase.from('appointments').insert(fields))
+}
+
+export async function deleteAppointment(id: string): Promise<void> {
+  check(await supabase.from('appointments').delete().eq('id', id))
 }

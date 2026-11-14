@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { formatTime } from '@shared/time'
+import AppointmentCard from '../../components/AppointmentCard'
 import BigButton from '../../components/BigButton'
 import ErrorRetry from '../../components/ErrorRetry'
 import { markSlotTaken } from '../../lib/api'
 import { isUnlocked, startAlarm, stopAlarm, unlock } from '../../lib/sound'
+import { useAppointments } from '../../lib/useAppointments'
 import { useTodayDoses } from '../../lib/useDoses'
 import type { Lang } from '../../i18n'
 import ReminderPopup from './ReminderPopup'
@@ -14,6 +16,7 @@ export default function ElderToday() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { active, next, error: loadError, loaded, reload, markTakenLocally, tz } = useTodayDoses()
+  const appts = useAppointments()
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const [done, setDone] = useState(false)
@@ -65,6 +68,8 @@ export default function ElderToday() {
       {loaded && (
         <p>{next ? `${t('elder.nextMedicine')}: ${formatTime(next.scheduled_at, tz, i18n.language as Lang)}` : t('elder.noMoreToday')}</p>
       )}
+      {appts.today.map((a) => <AppointmentCard key={a.id} appt={a} tz={tz} when="today" />)}
+      {appts.tomorrow.map((a) => <AppointmentCard key={a.id} appt={a} tz={tz} when="tomorrow" />)}
       <BigButton label={t('elder.addReading')} onClick={() => navigate('/add-reading')} />
     </main>
   )

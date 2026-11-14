@@ -58,7 +58,7 @@ insert into doses(household_id, medication_id, scheduled_at, status) values
  ('00000000-0000-0000-0000-00000000aaaa','10000000-0000-0000-0000-000000000003', date_trunc('minute', now()) - interval '1 hour','pending'),
  ('00000000-0000-0000-0000-00000000bbbb','10000000-0000-0000-0000-00000000000b', date_trunc('minute', now()) - interval '10 minutes','pending');
 insert into t.fx values ('now', date_trunc('minute', now())::text);
-insert into appointments(household_id, starts_at) values ('00000000-0000-0000-0000-00000000aaaa', now() + interval '2 days');
+insert into appointments(household_id, starts_at, day_before_sent_at, day_of_sent_at) values ('00000000-0000-0000-0000-00000000aaaa', now() + interval '2 days', now(), now());
 insert into storage.buckets(id, name) values ('household-files','household-files') on conflict do nothing;
 
 -- ---------- household isolation ----------
@@ -99,6 +99,16 @@ select t.blocked($$insert into ranges(household_id,key,low,high) values ('000000
 -- household_id defaults to the caller's household
 with i as (insert into hospitals(name) values ('Default Hospital') returning household_id)
   select t.ok((select household_id from i) = '00000000-0000-0000-0000-00000000aaaa', 'household_id defaults to my household');
+
+-- ---------- appointment reminders reset when the time changes ----------
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+update appointments set doctor = 'Dr X' where household_id = '00000000-0000-0000-0000-00000000aaaa';
+select t.as_super();
+select t.ok((select day_before_sent_at is not null and day_of_sent_at is not null from appointments where household_id = '00000000-0000-0000-0000-00000000aaaa'), 'reminder flags stay when other fields change');
+select t.as_user('00000000-0000-0000-0000-0000000000a1');
+update appointments set starts_at = starts_at + interval '1 day' where household_id = '00000000-0000-0000-0000-00000000aaaa';
+select t.as_super();
+select t.ok((select day_before_sent_at is null and day_of_sent_at is null from appointments where household_id = '00000000-0000-0000-0000-00000000aaaa'), 'reminder flags reset when the time changes');
 
 -- ---------- readings ----------
 select t.as_user('00000000-0000-0000-0000-0000000000a3');

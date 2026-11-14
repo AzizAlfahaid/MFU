@@ -11,6 +11,7 @@ vi.mock('../src/lib/sound', () => ({
 }))
 vi.mock('../src/lib/api', () => ({
   listDoses: vi.fn(), markSlotTaken: vi.fn().mockResolvedValue(2), subscribeDoses: vi.fn(() => () => undefined),
+  listAppointments: vi.fn().mockResolvedValue([]),
 }))
 import * as api from '../src/lib/api'
 import { useAuth } from '../src/lib/auth'

@@ -174,5 +174,21 @@
     "label": "Minutes before family is told of a missed dose",
     "save": "Save wait time",
     "err": "Enter a whole number from 5 to 240"
+  },
+  "appointments": {
+    "add": "Add appointment",
+    "edit": "Edit appointment",
+    "none": "No upcoming appointments",
+    "past": "Past appointments",
+    "date": "Date",
+    "time": "Time",
+    "hospital": "Hospital",
+    "doctor": "Doctor",
+    "purpose": "Purpose",
+    "notes": "Notes",
+    "errDateTime": "Please choose a date and time",
+    "confirmDelete": "Delete this appointment?",
+    "today": "Appointment today",
+    "tomorrow": "Appointment tomorrow"
   }
 }

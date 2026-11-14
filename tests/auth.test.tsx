@@ -13,6 +13,7 @@ vi.mock('../src/lib/api', () => ({
   updateHousehold: vi.fn(),
   listReadings: vi.fn().mockResolvedValue([]),
   listDoses: vi.fn().mockResolvedValue([]),
+  listAppointments: vi.fn().mockResolvedValue([]),
   subscribeDoses: vi.fn(() => () => undefined),
   markSlotTaken: vi.fn(),
   createMember: vi.fn().mockResolvedValue({ id: 'new' }),

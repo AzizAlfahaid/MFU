@@ -7,8 +7,8 @@ import ElderToday from './screens/elder/ElderToday'
 import AppShell from './screens/app/AppShell'
 import Medicines from './screens/app/Medicines'
 import AddReading from './screens/elder/AddReading'
+import Appointments from './screens/app/Appointments'
 import History from './screens/app/History'
-import Placeholder from './screens/app/Placeholder'
 import Readings from './screens/app/Readings'
 import Today from './screens/app/Today'
 import Settings from './screens/app/Settings'
@@ -32,13 +32,11 @@ export function AppRoutes() {
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<Navigate to="/today" replace />} />
-        {(['appointments'] as const).map((tab) => (
-          <Route key={tab} path={tab} element={<Placeholder tab={tab} />} />
-        ))}
         <Route path="today" element={<Today />} />
         <Route path="readings" element={<Readings />} />
         <Route path="add-reading" element={<AddReading />} />
         <Route path="history" element={<History />} />
+        <Route path="appointments" element={<Appointments />} />
         <Route path="medicines" element={<Medicines />} />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/today" replace />} />

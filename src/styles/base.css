@@ -41,3 +41,5 @@ input, select { display: block; width: 100%; min-height: 56px; font-size: inheri
 [role=tablist], .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
 [role=tab][aria-selected=true], .chips [aria-pressed=true] { background: var(--primary); color: #fff; }
 .readings { list-style: none; padding: 0; } .readings li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+.appt-card { background: #e8f1fb; border-radius: 16px; padding: 12px 16px; margin: 12px 0; }
+.appt-card h2 { margin: 0 0 4px; font-size: 1.1em; }
