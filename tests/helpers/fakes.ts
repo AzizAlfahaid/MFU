@@ -42,8 +42,11 @@ export class FakeStore implements TickStore {
       .map((d) => { d.reminder_sent_at = 'claimed'; return d.id })
   }
   async claimMissed(ids: string[]) {
-    return this.all.filter((d) => ids.includes(d.id) && d.status === 'pending' && d.missed_alert_sent_at === null)
+    return this.all.filter((d) => ids.includes(d.id) && (d.status === 'pending' || d.status === 'missed') && d.missed_alert_sent_at === null)
       .map((d) => { d.status = 'missed'; d.missed_alert_sent_at = 'claimed'; return d.id })
+  }
+  async unclaimMissed(ids: string[]) {
+    for (const d of this.all) if (ids.includes(d.id) && d.status === 'missed') d.missed_alert_sent_at = null
   }
   async claimLateAlerted(ids: string[]) {
     return this.all.filter((d) => ids.includes(d.id) && d.late_alert_sent_at === null)
@@ -70,12 +73,20 @@ export class FakeNotifier implements Notifier {
   texts: { chatId: number; text: string }[] = []
   pushResult: Record<string, 'ok' | 'gone'> = {}
   failChat: number | null = null
+  failChats = new Set<number>()
+  chatFailuresLeft = new Map<number, number>()
+  pushThrows = new Set<string>()
+  attempts = 0
   async push(sub: { endpoint: string }, p: { title: string; body: string; tag: string }) {
+    if (this.pushThrows.has(sub.endpoint)) throw new Error('push down')
     this.pushes.push({ endpoint: sub.endpoint, ...p })
     return this.pushResult[sub.endpoint] ?? 'ok'
   }
   async telegram(chatId: number, text: string) {
-    if (chatId === this.failChat) throw new Error('telegram down')
+    this.attempts++
+    if (chatId === this.failChat || this.failChats.has(chatId)) throw new Error('telegram down')
+    const left = this.chatFailuresLeft.get(chatId) ?? 0
+    if (left > 0) { this.chatFailuresLeft.set(chatId, left - 1); throw new Error('telegram blip') }
     this.texts.push({ chatId, text })
   }
   pushesTo = (endpoint: string) => this.pushes.filter((p) => p.endpoint === endpoint)

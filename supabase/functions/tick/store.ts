@@ -38,7 +38,10 @@ export function createStore(): TickStore {
       return ids(ok(await db.from('doses').update({ reminder_sent_at: nowIso() }).in('id', list).eq('status', 'pending').is('reminder_sent_at', null).select('id')))
     },
     async claimMissed(list) {
-      return ids(ok(await db.from('doses').update({ status: 'missed', missed_alert_sent_at: nowIso() }).in('id', list).eq('status', 'pending').is('missed_alert_sent_at', null).select('id')))
+      return ids(ok(await db.from('doses').update({ status: 'missed', missed_alert_sent_at: nowIso() }).in('id', list).in('status', ['pending', 'missed']).is('missed_alert_sent_at', null).select('id')))
+    },
+    async unclaimMissed(list) {
+      ok(await db.from('doses').update({ missed_alert_sent_at: null }).in('id', list).eq('status', 'missed'))
     },
     async claimLateAlerted(list) {
       return ids(ok(await db.from('doses').update({ late_alert_sent_at: nowIso() }).in('id', list).is('late_alert_sent_at', null).select('id')))

@@ -29,7 +29,8 @@
     "signUpFailed": "Could not create the account",
     "createAccount": "Create account",
     "newFamily": "New family? Create an account",
-    "haveAccount": "I already have an account"
+    "haveAccount": "I already have an account",
+    "offline": "Cannot reach the server. Check the internet."
   },
   "onboarding": {
     "title": "Set up your household",
@@ -102,7 +103,8 @@
     "missed": "Missed"
   },
   "today": {
-    "none": "No doses today"
+    "none": "No doses today",
+    "notChanged": "Nothing was saved. The list has been refreshed."
   },
   "history": {
     "none": "No history yet",

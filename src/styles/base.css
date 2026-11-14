@@ -43,3 +43,4 @@ input, select { display: block; width: 100%; min-height: 56px; font-size: inheri
 .readings { list-style: none; padding: 0; } .readings li { padding: 10px 0; border-bottom: 1px solid #ddd; }
 .appt-card { background: #e8f1fb; border-radius: 16px; padding: 12px 16px; margin: 12px 0; }
 .appt-card h2 { margin: 0 0 4px; font-size: 1.1em; }
+.toast { position: fixed; top: 0; inset-inline: 0; z-index: 200; margin: 0; text-align: center; background: #e7f6ea; padding: 16px; }

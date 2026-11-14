@@ -59,5 +59,5 @@ export function useTodayDoses() {
     () => todaySlots.find((s) => new Date(s.scheduled_at) > now && s.doses.some((d) => d.status === 'pending')) ?? null,
     [todaySlots, now],
   )
-  return { doses, todaySlots, active, next, loaded, error, reload, markTakenLocally, tz }
+  return { doses, todaySlots, active, next, loaded, error, reload, markTakenLocally, tz, now }
 }

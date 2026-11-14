@@ -1,5 +1,5 @@
-import { expect, it } from 'vitest'
-import { activeSlot, classifyDoses, dueAppointmentReminders, groupBySlot, planDoses } from '@shared/schedule'
+import { describe, expect, it } from 'vitest'
+import { activeSlot, canMarkTaken, classifyDoses, dueAppointmentReminders, groupBySlot, planDoses } from '@shared/schedule'
 import type { ApptRow, DoseRow, MedTime } from '@shared/types'
 
 const TZ = 'Asia/Riyadh'
@@ -143,4 +143,68 @@ it('a missed slot stops being active after the window (default 2 hours)', () => 
 })
 it('a pending due slot stays active however late it is', () => {
   expect(activeSlot([dose('a', 'm1', '2026-11-14T08:00:00')], at('2026-11-14T15:00:00'))).not.toBeNull()
+})
+
+// ---------- final-review fixes ----------
+describe('planDoses when a medicine time is edited mid-day', () => {
+  const now = at('2026-11-14T09:00:00')
+  it('moving a taken morning dose later does not create a second dose today', () => {
+    const existing = [dose('m', 'm1', '2026-11-14T08:00:00', 'taken'), dose('t', 'm1', '2026-11-15T08:00:00')]
+    const plan = planDoses([mt('m1', '10:00:00')], ['2026-11-14', '2026-11-15'], TZ, existing, now)
+    expect(plan.toInsert).toEqual([{ medication_id: 'm1', scheduled_at: iso('2026-11-15T10:00:00') }])
+    expect(plan.toDeleteIds).toEqual(['t'])
+  })
+  it('moving this evening\'s dose earlier (new time already past) keeps tonight\'s dose and changes from tomorrow', () => {
+    const existing = [dose('tonight', 'm1', '2026-11-14T20:00:00'), dose('tomorrow', 'm1', '2026-11-15T20:00:00')]
+    const plan = planDoses([mt('m1', '08:00:00')], ['2026-11-14', '2026-11-15'], TZ, existing, now)
+    expect(plan.toDeleteIds).toEqual(['tomorrow'])
+    expect(plan.toInsert).toEqual([{ medication_id: 'm1', scheduled_at: iso('2026-11-15T08:00:00') }])
+  })
+  it('moving a future dose to another future time today replaces it', () => {
+    const existing = [dose('old', 'm1', '2026-11-14T20:00:00')]
+    const plan = planDoses([mt('m1', '21:00:00')], ['2026-11-14'], TZ, existing, now)
+    expect(plan.toDeleteIds).toEqual(['old'])
+    expect(plan.toInsert).toEqual([{ medication_id: 'm1', scheduled_at: iso('2026-11-14T21:00:00') }])
+  })
+  it('adding a second daily time adds a dose without removing the first', () => {
+    const existing = [dose('a', 'm1', '2026-11-14T08:00:00', 'taken')]
+    const plan = planDoses([mt('m1', '08:00:00'), mt('m1', '20:00:00')], ['2026-11-14'], TZ, existing, now)
+    expect(plan.toInsert).toEqual([{ medication_id: 'm1', scheduled_at: iso('2026-11-14T20:00:00') }])
+    expect(plan.toDeleteIds).toEqual([])
+  })
+})
+
+describe('classifyDoses retries a missed dose nobody could be told about', () => {
+  const missedUnalerted = (id: string, local: string) => dose(id, 'm1', local, 'missed')
+  it('retries within 30 minutes after the wait', () => {
+    const r = classifyDoses([missedUnalerted('a', '2026-11-14T08:00:00')], at('2026-11-14T08:50:00'), 30)
+    expect(r.toMiss).toHaveLength(1)
+  })
+  it('stops retrying later', () => {
+    const r = classifyDoses([missedUnalerted('a', '2026-11-14T08:00:00')], at('2026-11-14T09:05:00'), 30)
+    expect(r.toMiss).toEqual([])
+  })
+  it('never alerts twice for one that was already announced', () => {
+    const d = dose('a', 'm1', '2026-11-14T08:00:00', 'missed', { missed_alert_sent_at: iso('2026-11-14T08:30:00') })
+    expect(classifyDoses([d], at('2026-11-14T08:50:00'), 30).toMiss).toEqual([])
+  })
+})
+
+describe('canMarkTaken', () => {
+  const now = at('2026-11-14T15:00:00')
+  it('allows a due pending slot', () => {
+    expect(canMarkTaken([dose('a', 'm1', '2026-11-14T14:00:00')], [], now)).toBe(true)
+  })
+  it('does not allow a future slot', () => {
+    expect(canMarkTaken([dose('a', 'm1', '2026-11-14T20:00:00')], [], now)).toBe(false)
+  })
+  it('allows a missed dose until the next dose of that medicine is due', () => {
+    const missed = dose('a', 'm1', '2026-11-14T08:00:00', 'missed')
+    expect(canMarkTaken([missed], [missed], at('2026-11-14T09:00:00'))).toBe(true)
+    const later = dose('b', 'm1', '2026-11-14T14:00:00', 'pending')
+    expect(canMarkTaken([missed], [missed, later], now)).toBe(false)
+  })
+  it('does not allow a slot that is all taken', () => {
+    expect(canMarkTaken([dose('a', 'm1', '2026-11-14T08:00:00', 'taken')], [], now)).toBe(false)
+  })
 })

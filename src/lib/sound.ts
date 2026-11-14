@@ -36,3 +36,10 @@ export function stopAlarm(): void {
   audio.pause()
   audio.currentTime = 0
 }
+
+/** iPhone only plays sound after a tap: unlock on the first tap anywhere, so it never depends on one button. */
+export function armAutoUnlock(): void {
+  if (unlocked || typeof window === 'undefined') return
+  const handler = () => void unlock()
+  window.addEventListener('pointerdown', handler, { once: true })
+}

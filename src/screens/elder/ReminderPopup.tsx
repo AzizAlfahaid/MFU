@@ -7,8 +7,8 @@ import StoredPhoto from '../../components/StoredPhoto'
 import type { EnrichedDose } from '../../lib/api'
 import type { Lang } from '../../i18n'
 
-export default function ReminderPopup({ slot, tz, busy, error, onTaken }: {
-  slot: Slot<EnrichedDose>; tz: string; busy: boolean; error: boolean; onTaken: () => void
+export default function ReminderPopup({ slot, tz, busy, error, soundOn, onEnableSound, onTaken }: {
+  slot: Slot<EnrichedDose>; tz: string; busy: boolean; error: boolean; soundOn: boolean; onEnableSound: () => void; onTaken: () => void
 }) {
   const { t, i18n } = useTranslation()
   return (
@@ -22,6 +22,7 @@ export default function ReminderPopup({ slot, tz, busy, error, onTaken }: {
           {d.notes && <p className="muted">{d.notes}</p>}
         </section>
       ))}
+      {!soundOn && <BigButton label={t('elder.soundOn')} variant="secondary" onClick={onEnableSound} />}
       {error && <ErrorRetry message={t('elder.saveFailed')} onRetry={onTaken} />}
       {!error && <BigButton label={t('common.taken')} onClick={onTaken} disabled={busy} />}
     </div>

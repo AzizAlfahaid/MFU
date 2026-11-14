@@ -16,6 +16,7 @@ export interface TickStore {
   deleteDoses(ids: string[]): Promise<void>
   claimReminded(ids: string[]): Promise<string[]>
   claimMissed(ids: string[]): Promise<string[]>
+  unclaimMissed(ids: string[]): Promise<void>
   claimLateAlerted(ids: string[]): Promise<string[]>
   readingsToAlert(hid: string): Promise<AlertReading[]>
   claimReadingAlerted(ids: string[]): Promise<string[]>
@@ -82,9 +83,15 @@ async function tickHousehold(h: Household, store: TickStore, notifier: Notifier,
     const claimed = await store.claimMissed(slot.doses.map((d) => d.id))
     if (!claimed.length) continue
     const medNames = names(claimed, slot.doses)
+    let delivered = false
     for (const r of family) {
       const body = missedDoseText(r.lang, formatTime(slot.scheduled_at, tz, r.lang), medNames)
-      await send(r, { title: appTitle(r.lang), body, tag: `missed-${slot.scheduled_at}` }, { push: true, telegram: true })
+      if (await send(r, { title: appTitle(r.lang), body, tag: `missed-${slot.scheduled_at}` }, { push: true, telegram: true })) delivered = true
+    }
+    if (!delivered) {
+      // Nobody could be told: release the claim so the next run tries again (for a short while).
+      await store.unclaimMissed(claimed)
+      errors.push(`household ${h.id}: missed-dose alert for ${slot.scheduled_at} reached nobody`)
     }
   }
 
@@ -126,19 +133,32 @@ async function tickHousehold(h: Household, store: TickStore, notifier: Notifier,
   }
 }
 
+async function attempt<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  let last: unknown
+  for (let i = 0; i < tries; i++) {
+    try { return await fn() } catch (e) { last = e }
+  }
+  throw last
+}
+
+/** Sends to one person on every channel they have. Resolves true if at least one channel got through. */
 function makeSender(store: TickStore, notifier: Notifier, errors: string[]) {
-  return async (r: Recipient, p: { title: string; body: string; tag: string }, via: { push: boolean; telegram: boolean }) => {
+  return async (r: Recipient, p: { title: string; body: string; tag: string }, via: { push: boolean; telegram: boolean }): Promise<boolean> => {
+    let delivered = false
     if (via.telegram && r.telegram_chat_id !== null) {
-      try { await notifier.telegram(r.telegram_chat_id, p.body) } catch (e) { errors.push(`telegram ${r.user_id}: ${msg(e)}`) }
+      try { await attempt(() => notifier.telegram(r.telegram_chat_id!, p.body)); delivered = true } catch (e) { errors.push(`telegram ${r.user_id}: ${msg(e)}`) }
     }
     if (via.push) {
       for (const sub of r.push) {
         try {
-          if ((await notifier.push(sub, p)) === 'gone') await store.removePushSubscription(sub.id)
+          const res = await attempt(() => notifier.push(sub, p))
+          if (res === 'gone') await store.removePushSubscription(sub.id)
+          else delivered = true
         } catch (e) {
           errors.push(`push ${r.user_id}: ${msg(e)}`)
         }
       }
     }
+    return delivered
   }
 }

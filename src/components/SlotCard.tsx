@@ -9,8 +9,6 @@ export default function SlotCard({ slot, tz, canMark, onTaken }: {
   slot: Slot<EnrichedDose>; tz: string; canMark: boolean; onTaken: () => void
 }) {
   const { t, i18n } = useTranslation()
-  const due = new Date(slot.scheduled_at) <= new Date()
-  const open = slot.doses.some((d) => d.status === 'pending' || d.status === 'missed')
   return (
     <li className="slot">
       <strong>{formatTime(slot.scheduled_at, tz, i18n.language as Lang)}</strong>
@@ -19,7 +17,7 @@ export default function SlotCard({ slot, tz, canMark, onTaken }: {
           <li key={d.id}>{d.name} — {d.dose} <span className={`badge ${d.status}`}>{t(`status.${d.status}`)}</span></li>
         ))}
       </ul>
-      {canMark && due && open && <BigButton label={t('common.taken')} onClick={onTaken} />}
+      {canMark && <BigButton label={t('common.taken')} onClick={onTaken} />}
     </li>
   )
 }

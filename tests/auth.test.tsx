@@ -57,6 +57,19 @@ describe('routing by status and role', () => {
     expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument()
     expect(screen.queryByRole('navigation')).toBeNull()
   })
+  it('the elder still gets the medicine popup while on another screen', async () => {
+    const due = new Date(Date.now() - 5 * 60_000); due.setSeconds(0, 0)
+    vi.mocked(api.listDoses).mockResolvedValue([{ id: 'd', medication_id: 'm', name: 'Metformin', dose: '5 mg', notes: null, photo_path: null,
+      scheduled_at: due.toISOString(), status: 'pending', reminder_sent_at: null, missed_alert_sent_at: null, late_alert_sent_at: null }] as never)
+    show(as('elder'), '/add-reading')
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Metformin')
+  })
+  it('a connection problem never shows the login form', () => {
+    show({ ...base, status: 'error', profile: null, household: null })
+    expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
+  })
   it('the helper sees the tab bar but no way to add medicines', () => {
     show(as('helper'), '/medicines')
     expect(screen.getByRole('navigation')).toBeInTheDocument()

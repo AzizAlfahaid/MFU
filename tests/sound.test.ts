@@ -40,3 +40,14 @@ it('the alarm loops once unlocked and stops on request', async () => {
   s.stopAlarm()
   expect(pause).toHaveBeenCalled()
 })
+
+it('unlocks on the first tap anywhere, once', async () => {
+  const s = await fresh()
+  s.armAutoUnlock()
+  window.dispatchEvent(new Event('pointerdown'))
+  await Promise.resolve(); await Promise.resolve()
+  expect(s.isUnlocked()).toBe(true)
+  play.mockClear()
+  window.dispatchEvent(new Event('pointerdown'))
+  expect(play).not.toHaveBeenCalled()
+})

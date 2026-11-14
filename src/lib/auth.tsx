@@ -6,7 +6,7 @@ import { fetchHousehold, fetchProfile } from './api'
 import { supabase } from './supabase'
 import type { Household, Profile } from './types'
 
-type Status = 'loading' | 'signedOut' | 'noHousehold' | 'ready'
+type Status = 'loading' | 'signedOut' | 'noHousehold' | 'ready' | 'error'
 interface AuthState { status: Status; profile: Profile | null; household: Household | null }
 export interface AuthValue extends AuthState {
   signIn(login: string, password: string): Promise<void>
@@ -29,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLanguage(profile.lang)
       setState({ status: 'ready', profile, household })
     } catch {
-      setState({ status: 'signedOut', profile: null, household: null })
+      // The session is fine; we just could not reach the server. Never show the login form for that.
+      setState((prev) => (prev.status === 'ready' ? prev : { status: 'error', profile: null, household: null }))
     }
   }, [])
 
@@ -40,6 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
     return () => data.subscription.unsubscribe()
   }, [load])
+
+  useEffect(() => {
+    if (state.status !== 'error') return
+    const id = setInterval(() => void supabase.auth.getSession().then(({ data }) => load(data.session)), 10_000)
+    return () => clearInterval(id)
+  }, [state.status, load])
 
   const value = useMemo<AuthValue>(() => ({
     ...state,
