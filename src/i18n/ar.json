@@ -1,0 +1,5 @@
+{
+  "app": { "name": "المتابعة الطبية" },
+  "lang": { "switchTo": "English" },
+  "common": { "save": "حفظ", "cancel": "إلغاء", "retry": "إعادة المحاولة", "back": "رجوع", "next": "التالي", "loading": "جارٍ التحميل…", "taken": "تم أخذ الدواء" }
+}

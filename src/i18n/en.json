@@ -1,0 +1,5 @@
+{
+  "app": { "name": "Medical Follow-Up" },
+  "lang": { "switchTo": "العربية" },
+  "common": { "save": "Save", "cancel": "Cancel", "retry": "Try again", "back": "Back", "next": "Next", "loading": "Loading…", "taken": "Taken" }
+}
