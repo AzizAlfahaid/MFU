@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider, useAuth } from './lib/auth'
@@ -6,6 +7,7 @@ import Onboarding from './screens/Onboarding'
 import ElderShell from './screens/elder/ElderShell'
 import ElderToday from './screens/elder/ElderToday'
 import ErrorRetry from './components/ErrorRetry'
+import { syncPush } from './lib/push'
 import AppShell from './screens/app/AppShell'
 import Medicines from './screens/app/Medicines'
 import AddReading from './screens/elder/AddReading'
@@ -19,6 +21,7 @@ import Settings from './screens/app/Settings'
 export function AppRoutes() {
   const { t } = useTranslation()
   const { status, profile, refresh } = useAuth()
+  useEffect(() => { if (status === 'ready') void syncPush() }, [status, profile?.id])
   if (status === 'loading') return <p className="elder">{t('common.loading')}</p>
   if (status === 'error') return <main className="elder"><ErrorRetry message={t('auth.offline')} onRetry={() => void refresh()} /></main>
   if (status === 'signedOut') return <Login />

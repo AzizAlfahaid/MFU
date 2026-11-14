@@ -11,17 +11,20 @@ export default function Onboarding() {
   const [name, setName] = useState('')
   const [me, setMe] = useState('')
   const [error, setError] = useState(false)
+  const [alreadySetUp, setAlreadySetUp] = useState(false)
   const [busy, setBusy] = useState(false)
 
   async function submit(e?: FormEvent) {
     e?.preventDefault()
     setError(false)
+    setAlreadySetUp(false)
     setBusy(true)
     try {
       await createHousehold(name.trim(), me.trim())
       await refresh()
-    } catch {
-      setError(true)
+    } catch (err) {
+      if ((err as Error).message.includes('household_exists')) setAlreadySetUp(true)
+      else setError(true)
     } finally {
       setBusy(false)
     }
@@ -40,6 +43,7 @@ export default function Onboarding() {
         </label>
         <button type="submit" className="big-button primary" disabled={busy}>{t('onboarding.create')}</button>
       </form>
+      {alreadySetUp && <p role="alert" className="error">{t('onboarding.alreadySetUp')}</p>}
       {error && <ErrorRetry message={t('common.error')} onRetry={() => void submit()} />}
       <button type="button" className="link" onClick={() => void signOut()}>{t('auth.signOut')}</button>
     </main>

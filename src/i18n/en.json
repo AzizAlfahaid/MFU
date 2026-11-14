@@ -36,7 +36,8 @@
     "title": "Set up your household",
     "householdName": "Household name",
     "yourName": "Your name",
-    "create": "Create household"
+    "create": "Create household",
+    "alreadySetUp": "This app is already set up for a family. Ask them to add you from Settings."
   },
   "elder": {
     "today": "Today",
@@ -94,7 +95,14 @@
     "usernameInvalid": "Username: letters and numbers only, at least 3",
     "usernameTaken": "That username is already used",
     "memberAdded": "Member added",
-    "addMember": "Add member"
+    "addMember": "Add member",
+    "languageOf": "Language of {{name}}",
+    "newPassword": "New password",
+    "newPasswordFor": "New password for {{name}}",
+    "savePassword": "Save password",
+    "remove": "Remove",
+    "confirmRemove": "Remove {{name}}? They will no longer be able to sign in.",
+    "noTelegram": "No family member has Telegram connected. Missed-dose alerts will only arrive as phone notifications."
   },
   "status": {
     "pending": "Waiting",

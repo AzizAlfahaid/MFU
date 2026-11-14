@@ -3,15 +3,54 @@ import { useTranslation } from 'react-i18next'
 import { isValidUsername } from '@shared/login'
 import ErrorRetry from '../../components/ErrorRetry'
 import { parseNumber } from '@shared/numbers'
-import { createMember, getMyTelegram, listMembers, listRanges, saveRange, updateHousehold } from '../../lib/api'
+import { createMember, getMyTelegram, listMembers, listRanges, manageMember, saveRange, updateHousehold } from '../../lib/api'
 import NotifyButton from '../../components/NotifyButton'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import type { Member, RangeKey, Role } from '../../lib/types'
 import type { Lang } from '../../i18n'
 
+function MemberRow({ m, self, onError, onChanged }: { m: Member; self: boolean; onError: (msg: string | null) => void; onChanged: () => void }) {
+  const { t } = useTranslation()
+  const [pw, setPw] = useState<string | null>(null)
+  const run = async (fn: () => Promise<void>) => {
+    onError(null)
+    try { await fn(); onChanged() } catch { onError(t('common.error')) }
+  }
+  return (
+    <li>
+      {m.display_name} — {t(`roles.${m.role}`)} {m.has_telegram && <span title="Telegram">✓ Telegram</span>}
+      <label>{t('settings.languageOf', { name: m.display_name })}
+        <select value={m.lang} onChange={(e) => void run(() => manageMember({ action: 'set_lang', id: m.id, lang: e.target.value as Lang }))}>
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      {pw === null ? (
+        <button type="button" onClick={() => setPw('')}>{t('settings.newPassword')}</button>
+      ) : (
+        <>
+          <label>{t('settings.newPasswordFor', { name: m.display_name })}
+            <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} />
+          </label>
+          <button type="button" onClick={() => {
+            if (pw.length < 8) return onError(t('settings.passwordShort'))
+            void run(async () => { await manageMember({ action: 'reset_password', id: m.id, password: pw }); setPw(null) })
+          }}>{t('settings.savePassword')}</button>
+        </>
+      )}
+      {!self && (
+        <button type="button" onClick={() => {
+          if (window.confirm(t('settings.confirmRemove', { name: m.display_name }))) void run(() => manageMember({ action: 'remove', id: m.id }))
+        }}>{t('settings.remove')}</button>
+      )}
+    </li>
+  )
+}
+
 function Members() {
   const { t } = useTranslation()
+  const { profile } = useAuth()
   const [members, setMembers] = useState<Member[]>([])
   const [loadError, setLoadError] = useState(false)
   const [name, setName] = useState('')
@@ -48,7 +87,10 @@ function Members() {
     <section>
       <h2>{t('settings.members')}</h2>
       {loadError && <ErrorRetry message={t('common.error')} onRetry={load} />}
-      <ul>{members.map((m) => <li key={m.id}>{m.display_name} — {t(`roles.${m.role}`)}</li>)}</ul>
+      {members.length > 0 && !members.some((m) => m.role === 'family' && m.has_telegram) && (
+        <p className="warn">{t('settings.noTelegram')}</p>
+      )}
+      <ul>{members.map((m) => <MemberRow key={m.id} m={m} self={m.id === profile?.id} onError={setError} onChanged={load} />)}</ul>
       <form onSubmit={submit}>
         <label>{t('settings.name')}<input value={name} onChange={(e) => setName(e.target.value)} required /></label>
         <label>{t('settings.role')}

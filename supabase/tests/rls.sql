@@ -180,9 +180,7 @@ select t.blocked($$select register_push_subscription('https://e/x','k','a')$$, '
 
 -- ---------- create_household ----------
 select t.as_user('00000000-0000-0000-0000-0000000000c1');
-select t.ok(create_household('Mine', 'Me') is not null, 'create_household works');
-select t.ok((select role from profiles where id = '00000000-0000-0000-0000-0000000000c1') = 'family', 'creator is family');
-select t.blocked($$select create_household('Again','Me')$$, 'second household refused');
+select t.blocked($$select create_household('Mine','Me')$$, 'a stranger cannot start a second household while one exists');
 select t.as_super();
 select t.blocked($$select create_household('x','y')$$, 'anonymous user refused');
 
@@ -198,6 +196,19 @@ select t.ok((select count(*) from storage.objects) = 0, 'other household cannot 
 select t.as_user('00000000-0000-0000-0000-0000000000a1');
 select t.ok((select count(*) from storage.objects) = 1, 'family sees files');
 with d as (delete from storage.objects returning 1) select t.ok((select count(*) from d) = 1, 'family can delete files');
+
+-- ---------- first-time setup ----------
+select t.as_super();
+delete from households;
+select t.as_user('00000000-0000-0000-0000-0000000000c1');
+select t.ok(create_household('Mine', 'Me') is not null, 'create_household works on a fresh install');
+select t.ok((select role from profiles where id = '00000000-0000-0000-0000-0000000000c1') = 'family', 'creator is family');
+select t.blocked($$select create_household('Again','Me')$$, 'second household refused');
+select t.as_super();
+
+-- ---------- uploads are limited to small images ----------
+select t.ok((select file_size_limit from storage.buckets where id = 'household-files') = 10485760, 'bucket has a size limit');
+select t.ok((select 'image/jpeg' = any(allowed_mime_types) and not ('application/pdf' = any(allowed_mime_types)) from storage.buckets where id = 'household-files'), 'bucket allows images only');
 
 -- ---------- server-only secrets ----------
 select t.as_super();

@@ -1,4 +1,4 @@
-import { registerPush } from './api'
+import { registerPush, unregisterPush as removePushRow } from './api'
 
 export type PushResult = 'enabled' | 'denied' | 'unsupported' | 'needs_home_screen'
 
@@ -43,4 +43,26 @@ export async function pushIsOn(): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+/** On every start after sign-in: make sure this device's subscription belongs to whoever is signed in. */
+export async function syncPush(): Promise<void> {
+  try {
+    if (!pushSupported() || Notification.permission !== 'granted') return
+    const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription()
+    if (!sub) return
+    const j = sub.toJSON()
+    await registerPush({ endpoint: j.endpoint!, p256dh: j.keys!.p256dh, auth: j.keys!.auth })
+  } catch { /* best effort */ }
+}
+
+/** On sign-out: this device stops receiving the previous person's alerts. */
+export async function unregisterPush(): Promise<void> {
+  try {
+    if (!pushSupported()) return
+    const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription()
+    if (!sub) return
+    await removePushRow(sub.endpoint)
+    await sub.unsubscribe()
+  } catch { /* best effort */ }
 }

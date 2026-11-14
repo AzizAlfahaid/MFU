@@ -220,3 +220,21 @@ export async function getMyTelegram(): Promise<{ telegram_chat_id: number | null
   const rows = check(await supabase.rpc('my_telegram')) as { telegram_chat_id: number | null; telegram_link_code: string }[]
   return rows[0]
 }
+
+export type ManageAction =
+  | { action: 'remove'; id: string }
+  | { action: 'reset_password'; id: string; password: string }
+  | { action: 'set_lang'; id: string; lang: Lang }
+
+export async function manageMember(input: ManageAction): Promise<void> {
+  const { error } = await supabase.functions.invoke('manage-member', { body: input })
+  if (error) {
+    let code = 'failed'
+    try { code = (await (error as { context?: Response }).context?.json())?.error ?? code } catch { /* no body */ }
+    throw new Error(code)
+  }
+}
+
+export async function unregisterPush(endpoint: string): Promise<void> {
+  check(await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint))
+}

@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { toEmail } from '@shared/login'
 import { setLanguage } from '../i18n'
 import { fetchHousehold, fetchProfile } from './api'
+import { unregisterPush } from './push'
 import { supabase } from './supabase'
 import type { Household, Profile } from './types'
 
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error
     },
     async signOut() {
+      await unregisterPush()
       await supabase.auth.signOut()
     },
     async refresh() {

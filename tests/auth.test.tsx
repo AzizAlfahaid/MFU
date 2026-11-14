@@ -21,6 +21,7 @@ vi.mock('../src/lib/api', () => ({
   createMember: vi.fn().mockResolvedValue({ id: 'new' }),
   updateMyLang: vi.fn().mockResolvedValue(undefined),
   createHousehold: vi.fn().mockResolvedValue('hid'),
+  manageMember: vi.fn().mockResolvedValue(undefined),
 }))
 import * as api from '../src/lib/api'
 import { AppRoutes } from '../src/App'
@@ -112,6 +113,14 @@ describe('onboarding and members', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Create household' }))
     await waitFor(() => expect(refresh).toHaveBeenCalled())
     expect(api.createHousehold).toHaveBeenCalledWith('Ahmed family', 'Sara')
+  })
+  it('tells a stranger the app is already set up', async () => {
+    vi.mocked(api.createHousehold).mockRejectedValueOnce(new Error('household_exists'))
+    show({ ...base, status: 'noHousehold', profile: null, household: null })
+    await userEvent.type(screen.getByLabelText('Household name'), 'X')
+    await userEvent.type(screen.getByLabelText('Your name'), 'Y')
+    await userEvent.click(screen.getByRole('button', { name: 'Create household' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('already set up')
   })
   it('family adds a member', async () => {
     show(as('family'), '/settings')
