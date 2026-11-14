@@ -158,6 +158,10 @@ builder) are ruled out by "no App Store" and the privacy/role needs.
 
 ## Detailed rules (builder's calls unless marked)
 
+- **Several medicines at the same time (owner's decision):** one popup per
+  time slot showing all medicines due (photo, name, dose each) with a single
+  big "Taken" button that marks them all. Doses are still stored per medicine.
+  A missed slot sends one family alert listing the medicines.
 - **Late dose:** after a dose is marked missed, "Taken" can still be tapped
   until that medicine's next scheduled time. It is saved as "taken late" and
   family gets a short follow-up message. The missed alert is sent once.
