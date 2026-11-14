@@ -4,8 +4,8 @@ import type { ApptRow, DoseRow, MedTime, Slot } from './types'
 const norm = (iso: string) => new Date(iso).toISOString()
 const hhmm = (t: string) => t.slice(0, 5)
 
-export function groupBySlot(doses: DoseRow[]): Slot[] {
-  const map = new Map<string, DoseRow[]>()
+export function groupBySlot<T extends DoseRow>(doses: T[]): Slot<T>[] {
+  const map = new Map<string, T[]>()
   for (const d of doses) {
     const k = norm(d.scheduled_at)
     map.set(k, [...(map.get(k) ?? []), d])
@@ -36,10 +36,10 @@ export function planDoses(
   return { toInsert, toDeleteIds }
 }
 
-export function classifyDoses(doses: DoseRow[], now: Date, waitMinutes: number): { toRemind: Slot[]; toMiss: Slot[]; lateTaken: DoseRow[] } {
+export function classifyDoses<T extends DoseRow>(doses: T[], now: Date, waitMinutes: number): { toRemind: Slot<T>[]; toMiss: Slot<T>[]; lateTaken: T[] } {
   const pendingDue = doses.filter((d) => d.status === 'pending' && new Date(d.scheduled_at).getTime() <= now.getTime())
-  const toRemind: Slot[] = []
-  const toMiss: Slot[] = []
+  const toRemind: Slot<T>[] = []
+  const toMiss: Slot<T>[] = []
   for (const slot of groupBySlot(pendingDue)) {
     const deadline = new Date(slot.scheduled_at).getTime() + minutes(waitMinutes)
     if (now.getTime() >= deadline) toMiss.push(slot)
@@ -51,13 +51,17 @@ export function classifyDoses(doses: DoseRow[], now: Date, waitMinutes: number):
   return { toRemind, toMiss, lateTaken: doses.filter((d) => d.status === 'taken_late' && d.late_alert_sent_at === null) }
 }
 
-/** The slot the elder's popup should show right now, or null. */
-export function activeSlot(doses: DoseRow[], now: Date): Slot | null {
+/**
+ * The slot the elder's popup should show right now, or null: the earliest due pending slot,
+ * else the latest missed slot (still within `missedWindowMinutes`) that has no later due dose.
+ */
+export function activeSlot<T extends DoseRow>(doses: T[], now: Date, missedWindowMinutes = 120): Slot<T> | null {
   const due = doses.filter((d) => new Date(d.scheduled_at).getTime() <= now.getTime())
   const pending = groupBySlot(due.filter((d) => d.status === 'pending'))
   if (pending.length) return pending[0]
   const missed = due.filter(
     (d) => d.status === 'missed'
+      && now.getTime() - new Date(d.scheduled_at).getTime() < minutes(missedWindowMinutes)
       && !due.some((o) => o.medication_id === d.medication_id && new Date(o.scheduled_at) > new Date(d.scheduled_at)),
   )
   const slots = groupBySlot(missed)

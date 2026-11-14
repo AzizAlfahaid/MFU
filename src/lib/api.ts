@@ -86,3 +86,29 @@ export async function setMedicationPhoto(id: string, path: string): Promise<void
 export async function deleteMedication(id: string): Promise<void> {
   check(await supabase.from('medications').delete().eq('id', id))
 }
+
+// ---------- doses ----------
+import type { DoseRow } from '@shared/types'
+
+export type EnrichedDose = DoseRow & { dose: string; notes: string | null; photo_path: string | null }
+
+export async function listDoses(fromIso: string, toIso: string): Promise<EnrichedDose[]> {
+  const rows = check(await supabase
+    .from('doses')
+    .select('id, medication_id, scheduled_at, status, reminder_sent_at, missed_alert_sent_at, late_alert_sent_at, medications(name, dose, notes, photo_path)')
+    .gte('scheduled_at', fromIso).lt('scheduled_at', toIso).order('scheduled_at')) as unknown as
+    (Omit<DoseRow, 'name'> & { medications: { name: string; dose: string; notes: string | null; photo_path: string | null } })[]
+  return rows.map(({ medications: m, ...d }) => ({ ...d, name: m.name, dose: m.dose, notes: m.notes, photo_path: m.photo_path }))
+}
+
+export async function markSlotTaken(slotIso: string): Promise<number> {
+  return check(await supabase.rpc('mark_slot_taken', { p_slot: slotIso })) as number
+}
+
+/** Calls `onChange` whenever any dose changes; returns an unsubscribe function. */
+export function subscribeDoses(onChange: () => void): () => void {
+  const channel = supabase.channel(`doses-${crypto.randomUUID()}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'doses' }, onChange)
+    .subscribe()
+  return () => { void supabase.removeChannel(channel) }
+}

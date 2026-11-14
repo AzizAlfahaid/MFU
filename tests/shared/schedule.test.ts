@@ -134,3 +134,13 @@ it('sends nothing after the start time or when already sent', () => {
   expect(dueAppointmentReminders([sent], at('2026-11-14T19:00:00'), TZ).dayBefore).toEqual([])
   expect(dueAppointmentReminders([sent], at('2026-11-15T09:00:00'), TZ).dayOf).toEqual([])
 })
+
+it('a missed slot stops being active after the window (default 2 hours)', () => {
+  const missed = dose('a', 'm1', '2026-11-14T08:00:00', 'missed')
+  expect(activeSlot([missed], at('2026-11-14T09:59:00'))).not.toBeNull()
+  expect(activeSlot([missed], at('2026-11-14T10:01:00'))).toBeNull()
+  expect(activeSlot([missed], at('2026-11-14T10:01:00'), 180)).not.toBeNull()
+})
+it('a pending due slot stays active however late it is', () => {
+  expect(activeSlot([dose('a', 'm1', '2026-11-14T08:00:00')], at('2026-11-14T15:00:00'))).not.toBeNull()
+})

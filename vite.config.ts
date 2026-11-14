@@ -11,6 +11,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
+      injectManifest: { globPatterns: ['**/*.{js,css,html,png,wav,svg}'] },
       manifest: {
         name: 'المتابعة الطبية',
         short_name: 'متابعة',

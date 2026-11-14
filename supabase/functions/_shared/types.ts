@@ -16,7 +16,7 @@ export interface DoseRow {
   missed_alert_sent_at: string | null
   late_alert_sent_at: string | null
 }
-export interface Slot { scheduled_at: string; doses: DoseRow[] }
+export interface Slot<T extends DoseRow = DoseRow> { scheduled_at: string; doses: T[] }
 export interface ApptRow {
   id: string
   starts_at: string

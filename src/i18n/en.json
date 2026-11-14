@@ -37,7 +37,15 @@
     "create": "Create household"
   },
   "elder": {
-    "today": "Today"
+    "today": "Today",
+    "medicineTime": "Medicine time",
+    "soundOn": "Turn on sound",
+    "done": "Done",
+    "nextMedicine": "Next medicine",
+    "noMoreToday": "No more medicine today",
+    "addReading": "Add reading",
+    "saveFailed": "Could not save. Check the internet and try again.",
+    "loadFailed": "Could not load. Check the internet and try again."
   },
   "tabs": {
     "label": "Main menu",
@@ -85,5 +93,18 @@
     "usernameTaken": "That username is already used",
     "memberAdded": "Member added",
     "addMember": "Add member"
+  },
+  "status": {
+    "pending": "Waiting",
+    "taken": "Taken",
+    "taken_late": "Taken late",
+    "missed": "Missed"
+  },
+  "today": {
+    "none": "No doses today"
+  },
+  "history": {
+    "none": "No history yet",
+    "summary": "{{taken}} taken · {{late}} late · {{missed}} missed"
   }
 }
