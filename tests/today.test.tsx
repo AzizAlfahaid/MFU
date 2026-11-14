@@ -46,7 +46,7 @@ describe('Elder Today', () => {
     expect(screen.getByText('Aspirin')).toBeInTheDocument()
     expect(screen.getByText('with food')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Taken' })).toHaveLength(1)
-    expect(sound.startAlarm).toHaveBeenCalled()
+    await waitFor(() => expect(sound.startAlarm).toHaveBeenCalled())
   })
   it('Taken marks the slot, stops the alarm and closes the popup', async () => {
     const at = due()
