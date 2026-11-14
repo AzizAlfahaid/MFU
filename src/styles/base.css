@@ -36,3 +36,8 @@ input, select { display: block; width: 100%; min-height: 56px; font-size: inheri
 .slot { background: var(--card); border-radius: 12px; padding: 12px; margin: 12px 0; }
 .badge { font-size: 14px; padding: 2px 8px; border-radius: 8px; background: #ddd; margin-inline-start: 6px; }
 .badge.taken { background: #c9efd1; } .badge.taken_late { background: #fde7b0; } .badge.missed { background: #f7c4c4; }
+.big-number { font-size: 96px; font-weight: 800; text-align: center; margin: 16px 0 0; }
+.warn { color: #8a5a00; background: #fff3cd; padding: 12px; border-radius: 12px; font-weight: 700; }
+[role=tablist], .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+[role=tab][aria-selected=true], .chips [aria-pressed=true] { background: var(--primary); color: #fff; }
+.readings { list-style: none; padding: 0; } .readings li { padding: 10px 0; border-bottom: 1px solid #ddd; }

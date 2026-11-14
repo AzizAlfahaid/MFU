@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isValidUsername } from '@shared/login'
 import ErrorRetry from '../../components/ErrorRetry'
-import { createMember, listMembers } from '../../lib/api'
+import { parseNumber } from '@shared/numbers'
+import { createMember, listMembers, listRanges, saveRange, updateHousehold } from '../../lib/api'
 import { useAuth } from '../../lib/auth'
-import type { Member, Role } from '../../lib/types'
+import type { Member, RangeKey, Role } from '../../lib/types'
 import type { Lang } from '../../i18n'
 
 function Members() {
@@ -69,6 +70,82 @@ function Members() {
   )
 }
 
+
+const RANGE_KEYS: RangeKey[] = ['sugar_fasting', 'sugar_after_meal', 'sugar_other', 'bp_systolic', 'bp_diastolic', 'temp']
+
+function Ranges() {
+  const { t } = useTranslation()
+  const [vals, setVals] = useState<Record<string, { low: string; high: string }>>({})
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    listRanges().then((rs) => setVals(Object.fromEntries(rs.map((r) => [r.key, { low: String(r.low), high: String(r.high) }])))).catch(() => setError(t('common.error')))
+  }, [t])
+
+  const set = (key: string, part: 'low' | 'high', v: string) => setVals((x) => ({ ...x, [key]: { ...(x[key] ?? { low: '', high: '' }), [part]: v } }))
+
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    setError(null); setSaved(false)
+    const todo: [RangeKey, number, number][] = []
+    for (const key of RANGE_KEYS) {
+      const v = vals[key]
+      if (!v || (!v.low.trim() && !v.high.trim())) continue
+      const low = parseNumber(v.low), high = parseNumber(v.high)
+      if (low === null || high === null) return setError(t('ranges.errNumber'))
+      if (low >= high) return setError(t('ranges.errOrder'))
+      todo.push([key, low, high])
+    }
+    try { for (const [k, l, h] of todo) await saveRange(k, l, h); setSaved(true) } catch { setError(t('common.error')) }
+  }
+
+  return (
+    <section>
+      <h2>{t('ranges.title')}</h2>
+      <p className="muted">{t('ranges.hint')}</p>
+      <form onSubmit={submit}>
+        {RANGE_KEYS.map((key) => {
+          const label = t(`ranges.name.${key}`)
+          return (
+            <div key={key} className="row">
+              <strong>{label}</strong>
+              <input aria-label={t('ranges.low', { label })} inputMode="decimal" value={vals[key]?.low ?? ''} onChange={(e) => set(key, 'low', e.target.value)} />
+              <input aria-label={t('ranges.high', { label })} inputMode="decimal" value={vals[key]?.high ?? ''} onChange={(e) => set(key, 'high', e.target.value)} />
+            </div>
+          )
+        })}
+        {error && <p role="alert" className="error">{error}</p>}
+        {saved && <p role="status">{t('ranges.saved')}</p>}
+        <button type="submit">{t('ranges.save')}</button>
+      </form>
+    </section>
+  )
+}
+
+function Wait() {
+  const { t } = useTranslation()
+  const { household, refresh } = useAuth()
+  const [v, setV] = useState(String(household?.missed_wait_minutes ?? 30))
+  const [error, setError] = useState<string | null>(null)
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    const n = parseNumber(v)
+    if (n === null || !Number.isInteger(n) || n < 5 || n > 240) return setError(t('wait.err'))
+    try { await updateHousehold({ missed_wait_minutes: n }); await refresh() } catch { setError(t('common.error')) }
+  }
+  return (
+    <section>
+      <form onSubmit={submit}>
+        <label>{t('wait.label')}<input inputMode="numeric" value={v} onChange={(e) => setV(e.target.value)} /></label>
+        {error && <p role="alert" className="error">{error}</p>}
+        <button type="submit">{t('wait.save')}</button>
+      </form>
+    </section>
+  )
+}
+
 export default function Settings() {
   const { t } = useTranslation()
   const { profile, signOut } = useAuth()
@@ -76,6 +153,8 @@ export default function Settings() {
     <div>
       <h1>{t('tabs.settings')}</h1>
       {profile?.role === 'family' && <Members />}
+      {profile?.role === 'family' && <Ranges />}
+      {profile?.role === 'family' && <Wait />}
       <button type="button" onClick={() => void signOut()}>{t('auth.signOut')}</button>
     </div>
   )

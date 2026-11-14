@@ -8,6 +8,10 @@ vi.mock('../src/lib/auth', () => ({ useAuth: vi.fn(), AuthProvider: ({ children 
 vi.mock('../src/lib/api', () => ({
   listMembers: vi.fn().mockResolvedValue([]),
   listMedications: vi.fn().mockResolvedValue([]),
+  listRanges: vi.fn().mockResolvedValue([]),
+  saveRange: vi.fn(),
+  updateHousehold: vi.fn(),
+  listReadings: vi.fn().mockResolvedValue([]),
   listDoses: vi.fn().mockResolvedValue([]),
   subscribeDoses: vi.fn(() => () => undefined),
   markSlotTaken: vi.fn(),

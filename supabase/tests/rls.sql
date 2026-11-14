@@ -108,9 +108,13 @@ select t.blocked($$insert into readings(household_id,type,value1,entered_by,sour
 select t.blocked($$insert into readings(household_id,type,value1,entered_by,source) values ('00000000-0000-0000-0000-00000000aaaa','sugar',100,'00000000-0000-0000-0000-0000000000a3','typed')$$, 'sugar needs context');
 select t.blocked($$insert into readings(household_id,type,value1,entered_by,source,alert_sent_at) values ('00000000-0000-0000-0000-00000000aaaa','temp',39,'00000000-0000-0000-0000-0000000000a3','typed', now())$$, 'client cannot set alert_sent_at');
 select t.blocked($$update readings set value1 = 1$$, 'no client update of readings');
+-- a client-chosen id makes retries safe: the second insert of the same id is refused
+with i as (insert into readings(id,type,value1,entered_by,source) values ('20000000-0000-0000-0000-000000000001','temp',37,'00000000-0000-0000-0000-0000000000a3','typed') returning 1)
+  select t.ok((select count(*) from i) = 1, 'elder can insert with own id');
+select t.blocked($$insert into readings(id,type,value1,entered_by,source) values ('20000000-0000-0000-0000-000000000001','temp',37,'00000000-0000-0000-0000-0000000000a3','typed')$$, 'same id twice is refused');
 select t.blocked($$delete from readings$$, 'elder cannot delete readings');
 select t.as_user('00000000-0000-0000-0000-0000000000a1');
-with d as (delete from readings returning 1) select t.ok((select count(*) from d) = 1, 'family can delete readings');
+with d as (delete from readings returning 1) select t.ok((select count(*) from d) = 2, 'family can delete readings');
 
 -- ---------- doses ----------
 select t.as_user('00000000-0000-0000-0000-0000000000a3');

@@ -15,7 +15,8 @@
     "taken": "Taken",
     "error": "Something went wrong. Please try again.",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "done": "Done"
   },
   "auth": {
     "signIn": "Sign in",
@@ -106,5 +107,66 @@
   "history": {
     "none": "No history yet",
     "summary": "{{taken}} taken · {{late}} late · {{missed}} missed"
+  },
+  "reading": {
+    "whatToAdd": "What do you want to add?",
+    "whenSugar": "When was it taken?",
+    "type": {
+      "sugar": "Blood sugar",
+      "bp": "Blood pressure",
+      "temp": "Temperature"
+    },
+    "ctx": {
+      "fasting": "Fasting",
+      "after_meal": "After a meal",
+      "other": "Other time"
+    },
+    "all": "All",
+    "label": {
+      "sugar": "Blood sugar (mg/dL)",
+      "temp": "Temperature (°C)",
+      "bp1": "Upper number",
+      "bp2": "Lower number",
+      "pulse": "Pulse (optional)"
+    },
+    "unit": {
+      "sugar": "mg/dL",
+      "bp": "mmHg",
+      "temp": "°C"
+    },
+    "errNumber": "Please type a number",
+    "errImplausible": "Please check the number",
+    "isThisRight": "Is this right?",
+    "change": "Change",
+    "saved": "Saved",
+    "outOfRange": "Outside the range set by the family. The family has been told.",
+    "checkMatches": "Check that the number matches the meter",
+    "none": "No readings yet",
+    "outside": "Outside the set range",
+    "fromPhoto": "from photo",
+    "confirmDelete": "Delete this reading?"
+  },
+  "ranges": {
+    "title": "Normal ranges",
+    "hint": "Ask the doctor for these numbers. Leave empty if not set.",
+    "low": "{{label}} low",
+    "high": "{{label}} high",
+    "save": "Save ranges",
+    "saved": "Saved",
+    "errNumber": "Please type numbers only",
+    "errOrder": "Low must be below high",
+    "name": {
+      "sugar_fasting": "Blood sugar fasting",
+      "sugar_after_meal": "Blood sugar after a meal",
+      "sugar_other": "Blood sugar other time",
+      "bp_systolic": "Blood pressure upper number",
+      "bp_diastolic": "Blood pressure lower number",
+      "temp": "Temperature"
+    }
+  },
+  "wait": {
+    "label": "Minutes before family is told of a missed dose",
+    "save": "Save wait time",
+    "err": "Enter a whole number from 5 to 240"
   }
 }

@@ -112,3 +112,49 @@ export function subscribeDoses(onChange: () => void): () => void {
     .subscribe()
   return () => { void supabase.removeChannel(channel) }
 }
+
+// ---------- readings and ranges ----------
+import { isOutOfRange } from '@shared/ranges'
+import type { Range, RangeKey, Reading, ReadingType, SugarContext } from './types'
+
+const READING_COLUMNS = 'id, type, context, value1, value2, pulse, taken_at, entered_by, photo_path, source, out_of_range'
+
+export async function listReadings(type: ReadingType, sinceIso: string): Promise<Reading[]> {
+  return check(await supabase.from('readings').select(READING_COLUMNS).eq('type', type).gte('taken_at', sinceIso).order('taken_at', { ascending: false })) as Reading[]
+}
+
+export async function listRanges(): Promise<Range[]> {
+  return check(await supabase.from('ranges').select('id, key, low, high')) as Range[]
+}
+
+export async function saveRange(key: RangeKey, low: number, high: number): Promise<void> {
+  check(await supabase.from('ranges').upsert({ key, low, high }, { onConflict: 'household_id,key' }))
+}
+
+export interface NewReading {
+  id?: string; type: ReadingType; context: SugarContext | null; value1: number
+  value2?: number | null; pulse?: number | null; photo_path?: string | null; source: 'typed' | 'photo'
+}
+
+/** Saves a confirmed reading. Retrying with the same id is safe (a duplicate counts as saved). */
+export async function addReading(input: NewReading): Promise<{ out_of_range: boolean }> {
+  const out_of_range = isOutOfRange(input, await listRanges())
+  const { data } = await supabase.auth.getUser()
+  const { error } = await supabase.from('readings').insert({
+    id: input.id, type: input.type, context: input.context, value1: input.value1, value2: input.value2 ?? null,
+    pulse: input.pulse ?? null, photo_path: input.photo_path ?? null, source: input.source,
+    out_of_range, entered_by: data.user?.id,
+  })
+  if (error && (error as { code?: string }).code !== '23505') throw new Error(error.message)
+  return { out_of_range }
+}
+
+export async function deleteReading(id: string): Promise<void> {
+  check(await supabase.from('readings').delete().eq('id', id))
+}
+
+export async function updateHousehold(patch: { missed_wait_minutes?: number; timezone?: string }): Promise<void> {
+  const { data } = await supabase.auth.getUser()
+  const p = check(await supabase.from('profiles').select('household_id').eq('id', data.user!.id).single()) as { household_id: string }
+  check(await supabase.from('households').update(patch).eq('id', p.household_id))
+}
